@@ -15,6 +15,6 @@ func main() {
 	mux.HandleFunc("GET /", handlers.TimeSeriesHandler)
 	mux.HandleFunc("GET /update", handlers.TimeSeriesHandler)
 
-	log.Printf("Starting server on %s", config.PORT)
+	log.Printf("Starting server on http://localhost%s/", config.PORT)
 	log.Fatal(http.ListenAndServe(config.PORT, mux))
 }
