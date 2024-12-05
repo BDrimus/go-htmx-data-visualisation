@@ -75,11 +75,12 @@ function initChart() {
     const chart = document.getElementById('chart');
     if (!chart) return;
     
-    const verticalLine = document.getElementById('vertical-line');
-    const tooltipWidth = parseInt(parseFloat(chart.dataset.tooltipWidth), 10);
-    const svgWidth = parseInt(chart.viewBox.baseVal.width, 10);
-    let debounceTimeout;
+    const verticalLine = document.getElementById('vertical-line'); // Vertical line for the SVG chart
+    const tooltipWidth = parseInt(parseFloat(chart.dataset.tooltipWidth), 10); // Width of the tooltip
+    const svgWidth = parseInt(chart.viewBox.baseVal.width, 10); // Width of the SVG element
+    let debounceTimeout; // Timeout for debouncing mousemove events
 
+    // Resize observer to update the chart scale
     const resizeObserver = new ResizeObserver(entries => {
         for (const entry of entries) {
             if (entry.target === chart) {
@@ -95,6 +96,7 @@ function initChart() {
         chart.style.height = `${rect.width * 0.5}px`;
     }
 
+    // Convert mouse position to SVG scale
     function getScaledMousePosition(event, svg) {
         const rect = svg.getBoundingClientRect();
         const mouseX = event.clientX - rect.left;
