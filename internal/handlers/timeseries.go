@@ -30,7 +30,7 @@ func initTemplate() (*template.Template, error) {
 }
 
 func TimeSeriesHandler(w http.ResponseWriter, r *http.Request) {
-	series := timeseries.GenerateTimeSeries(50, 100.0)
+	series := timeseries.GenerateTimeSeries(50, 100.0, 0, 0)
 	tmpl, err := initTemplate()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

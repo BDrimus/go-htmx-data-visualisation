@@ -19,7 +19,16 @@ type TimeSeries struct {
 }
 
 // GenerateTimeSeries generates a random time series with the given number of points and initial value.
-func GenerateTimeSeries(numOfPoints int, initialValue float64) TimeSeries {
+func GenerateTimeSeries(numOfPoints int, initialValue, volatility, trend float64) TimeSeries {
+
+	// Assign default values if not provided
+	if volatility == 0.0 {
+		volatility = 0.1 // 10% max change
+	}
+
+	if trend == 0.0 {
+		trend = 0.02 // 2% trend
+	}
 
 	// Random source with current time as seed
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -28,9 +37,6 @@ func GenerateTimeSeries(numOfPoints int, initialValue float64) TimeSeries {
 	currentValue := initialValue
 
 	for i := 0; i < numOfPoints; i++ {
-
-		const volatility = 0.1 /// 10% max change
-		const trend = 0.02     // 2% trend
 
 		// Random change
 		change := (rng.Float64()*2 - 1) * volatility * currentValue
