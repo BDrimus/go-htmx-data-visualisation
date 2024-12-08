@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"strconv"
 	"strings"
 	"text/template"
@@ -27,4 +28,12 @@ func parseTimeInterval(interval string) (time.Duration, error) {
 	}
 
 	return time.ParseDuration(interval)
+}
+
+func mustMarshal(v interface{}) string {
+	b, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+	return string(b)
 }
