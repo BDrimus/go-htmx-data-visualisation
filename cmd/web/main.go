@@ -17,7 +17,8 @@ func main() {
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	mux.HandleFunc("/", handlers.HomeHandler)
-	mux.HandleFunc("/stock", handlers.StockHandler)
+	mux.HandleFunc("/stock/primary", handlers.HandlePrimaryStock)
+	mux.HandleFunc("/stock/compare", handlers.HandleCompareStock)
 	mux.HandleFunc("/stock_chart", handlers.StockChartHandler)
 
 	log.Printf("Starting server on http://localhost%s/", config.PORT)

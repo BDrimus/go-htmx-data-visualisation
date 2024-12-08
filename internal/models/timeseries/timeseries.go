@@ -31,6 +31,10 @@ func GenerateTimeSeries(numOfPoints int, initialValue, volatility, trend float64
 		trend = 0.02 // 2% trend
 	}
 
+	if timeInterval == 0 {
+		timeInterval = time.Minute
+	}
+
 	// Random source with current time as seed
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 

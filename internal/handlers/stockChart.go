@@ -11,28 +11,28 @@ import (
 
 func StockChartHandler(w http.ResponseWriter, r *http.Request) {
 
-	stockData, err := getStockData(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	// Get primary stock data
+	stockData := stockCache.Primary
+
+	var compareStockData *StockData
+
+	// Get comparison stock if specified
+	if stockCache.Compare != nil {
+		compareStockData = stockCache.Compare
 	}
 
-	// In StockChartHandler, before template execution:
-	jsonData, err := json.Marshal(stockData)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Pass the JSON string to template
 	data := struct {
-		StockDataJSON template.JS
+		PrimaryStock template.JS
+		CompareStock template.JS
 	}{
-		StockDataJSON: template.JS(jsonData),
+		PrimaryStock: template.JS(mustMarshal(stockData)),
+	}
+	if compareStockData != nil {
+		data.CompareStock = template.JS(mustMarshal(compareStockData))
 	}
 
 	tmpl := template.New(config.BaseTemplate).Funcs(funcMap)
-	tmpl, err = tmpl.ParseFiles(
+	tmpl, err := tmpl.ParseFiles(
 		filepath.Join(config.TemplatesFolder, config.BaseTemplate),
 		filepath.Join(config.TemplatesFolder, "stock_chart.html"),
 	)
@@ -44,4 +44,12 @@ func StockChartHandler(w http.ResponseWriter, r *http.Request) {
 	if err := tmpl.ExecuteTemplate(w, "stock_chart", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+func mustMarshal(v interface{}) string {
+	b, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+	return string(b)
 }

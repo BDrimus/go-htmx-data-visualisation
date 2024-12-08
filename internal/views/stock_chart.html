@@ -1,63 +1,87 @@
 {{define "stock_chart"}}
 <div class="chart-wrapper">
-    <canvas id="chart-container"></canvas>
+  <canvas id="chart-container"></canvas>
 </div>
 <script>
+  // Fixes variable redeclaration error
+  (() => {
 
-    // Fixes variable redeclaration error
-    (() => {
-        const stockData = JSON.parse("{{.StockDataJSON}}");
+    const ctx = document.getElementById("chart-container");
+  
+    // Destroy any existing chart
+    Chart.getChart(ctx)?.destroy();
     
-        console.log("stockData", stockData);
+    const stockData = JSON.parse("{{.PrimaryStock}}");
+    let compareStockData = null;
+    
+    try {
+      const compareStockStr = "{{.CompareStock}}";
+      if (compareStockStr && compareStockStr !== "null") {
+        compareStockData = JSON.parse(compareStockStr);
+      }
+    } catch (err) {
+      console.error("Failed to parse compare stock data:", err);
+    }
 
-        // Extract data points
-        const values = stockData.Series.Points.map(point => point.Value);
-        const timestamps = stockData.Series.Points.map(point => {
-            const date = new Date(point.Time);
-            return date.toLocaleTimeString();
-        });
+    console.log("stockData", stockData);
 
-        const ctx = document.getElementById('chart-container');
-        const myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: timestamps,
-                datasets: [{
-                    label: stockData.Symbol,
-                    data: values,
-                    borderColor: 'rgb(75, 192, 192)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
-                }]
+    const datasets = [
+      {
+        label: stockData.Symbol,
+        data: stockData.Series.Points.map((point) => point.Value),
+        borderColor: "rgb(75, 192, 192)",
+        backgroundColor: "rgba(75, 192, 192, 0.1)",
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+      },
+    ];
+
+    if (compareStockData) {
+      datasets.push({
+        label: compareStockData.Symbol,
+        data: compareStockData.Series.Points.map((point) => point.Value),
+        borderColor: "rgb(192, 75, 75)",
+        backgroundColor: "rgba(192, 75, 75, 0.1)",
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+      });
+    }
+
+    new Chart(ctx, {
+        type: "line",
+      data: {
+        labels: stockData.Series.Points.map((point) =>
+          new Date(point.Time).toLocaleTimeString()
+        ),
+        datasets: datasets,
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: compareStockData
+              ? `${stockData.Symbol} vs ${compareStockData.Symbol}`
+              : `${stockData.Symbol} Stock Price`,
+          },
+          tooltip: {
+            callbacks: {
+              label: (context) => `£${context.parsed.y.toFixed(2)}`,
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: stockData.Symbol + ' Stock Price Chart',
-                        font: {
-                            size: 16
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: (context) => `£${context.parsed.y.toFixed(2)}`
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        ticks: {
-                            callback: (value) => '£' + value.toFixed(2)
-                        }
-                    }
-                }
-            }
-        });
-    })();
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+            ticks: {
+              callback: (value) => "£" + value.toFixed(2),
+            },
+          },
+        },
+      },
+    });
+  })();
 </script>
 {{end}}

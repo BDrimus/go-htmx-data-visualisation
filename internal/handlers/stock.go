@@ -5,45 +5,62 @@ import (
 	"net/http"
 	"path/filepath"
 	"text/template"
-	"time"
 
 	"github.com/BDrimus/go-htmx-data-visualisation/internal/config"
 	"github.com/BDrimus/go-htmx-data-visualisation/internal/models/timeseries"
 )
 
-var seriesCache = make(map[string]timeseries.TimeSeries)
+type StockPair struct {
+	Primary *StockData
+	Compare *StockData
+}
+
+var stockCache = &StockPair{
+	Primary: nil,
+	Compare: nil,
+}
 
 type StockData struct {
 	Symbol string
-	Series timeseries.TimeSeries
+	Series *timeseries.TimeSeries
 }
 
-func StockHandler(w http.ResponseWriter, r *http.Request) {
+// Handler for the primary stock data
+func HandlePrimaryStock(w http.ResponseWriter, r *http.Request) {
 
-	stockData, err := getStockData(r)
+	stockData, err := getStockData(r, false)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	tmpl := template.New(config.BaseTemplate).Funcs(funcMap)
-	tmpl, err = tmpl.ParseFiles(
-		filepath.Join(config.TemplatesFolder, config.BaseTemplate),
-		filepath.Join(config.TemplatesFolder, "stock_component.html"),
-	)
-	if err != nil {
+	tmpl := initStockTemplate()
+
+	if err := tmpl.ExecuteTemplate(w, "stock_component", stockData); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
 
-	if err := tmpl.ExecuteTemplate(w, "stock_component", stockData); err != nil {
+// Handler for the comparison stock data
+func HandleCompareStock(w http.ResponseWriter, r *http.Request) {
+
+	stockData, err := getStockData(r, true)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	tmpl := initStockTemplate()
+
+	if err := tmpl.ExecuteTemplate(w, "stock_info_panel", stockData); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 }
 
-func getStockData(r *http.Request) (*StockData, error) {
+func getStockData(r *http.Request, isCompare bool) (*StockData, error) {
 	symbol := r.URL.Query().Get("symbol")
 	if symbol == "" {
 		return nil, fmt.Errorf("stock symbol is required")
@@ -59,22 +76,30 @@ func getStockData(r *http.Request) (*StockData, error) {
 		return nil, fmt.Errorf("invalid time interval")
 	}
 
-	series := checkSeriesCache(symbol, timeIntervalDuration)
-
-	return &StockData{
+	series := timeseries.GenerateTimeSeries(50, 100.0, 0, 0, timeIntervalDuration)
+	stockData := &StockData{
 		Symbol: symbol,
-		Series: series,
-	}, nil
-}
-
-func checkSeriesCache(symbol string, timeIntervalDuration time.Duration) (series timeseries.TimeSeries) {
-	if cachedSeries, exists := seriesCache[symbol]; exists {
-		series = cachedSeries
-	} else {
-		series = timeseries.GenerateTimeSeries(50, 100.0, 0, 0, timeIntervalDuration)
-		seriesCache = make(map[string]timeseries.TimeSeries) // Clear the cache
-		seriesCache[symbol] = series
+		Series: &series,
 	}
 
-	return series
+	if isCompare {
+		stockCache.Compare = stockData
+	} else {
+		stockCache.Primary = stockData
+	}
+
+	return stockData, nil
+}
+
+func initStockTemplate() *template.Template {
+	tmpl := template.New(config.BaseTemplate).Funcs(funcMap)
+	tmpl, err := tmpl.ParseFiles(
+		filepath.Join(config.TemplatesFolder, config.BaseTemplate),
+		filepath.Join(config.TemplatesFolder, "stock_component.html"),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	return tmpl
 }
