@@ -1,0 +1,63 @@
+{{define "stock_chart"}}
+<div class="chart-wrapper">
+    <canvas id="chart-container"></canvas>
+</div>
+<script>
+
+    // Fixes variable redeclaration error
+    (() => {
+        const stockData = JSON.parse("{{.StockDataJSON}}");
+    
+        console.log("stockData", stockData);
+
+        // Extract data points
+        const values = stockData.Series.Points.map(point => point.Value);
+        const timestamps = stockData.Series.Points.map(point => {
+            const date = new Date(point.Time);
+            return date.toLocaleTimeString();
+        });
+
+        const ctx = document.getElementById('chart-container');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: timestamps,
+                datasets: [{
+                    label: stockData.Symbol,
+                    data: values,
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: stockData.Symbol + ' Stock Price Chart',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `£${context.parsed.y.toFixed(2)}`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            callback: (value) => '£' + value.toFixed(2)
+                        }
+                    }
+                }
+            }
+        });
+    })();
+</script>
+{{end}}

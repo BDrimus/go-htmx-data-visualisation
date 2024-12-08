@@ -1,0 +1,36 @@
+{{define "title"}}Stock Viewer{{end}}
+
+{{define "content"}}
+<div class="bg-white shadow-lg rounded-lg p-6">
+    <div class="form-group">
+        <label for="stockSelect">Select Stock Symbol:</label>
+        <select 
+            id="stockSelect" 
+            name="symbol" 
+            class="form-control"
+            hx-get="/stock"
+            hx-trigger="change"
+            hx-target="#stock-result"
+            hx-indicator="#loading"
+            style="cursor: pointer;">
+            <option value="">Choose a stock...</option>
+            <option value="AAPL">Apple (AAPL)</option>
+            <option value="GOOGL">Google (GOOGL)</option>
+            <option value="MSFT">Microsoft (MSFT)</option>
+            <option value="AMZN">Amazon (AMZN)</option>
+            <option value="META">Meta (META)</option>
+        </select>
+    </div>
+
+    <div id="loading" class="htmx-indicator">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+    <div id="stock-result">
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{end}}

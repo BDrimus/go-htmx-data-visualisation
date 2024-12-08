@@ -8,6 +8,7 @@ import (
 
 type DataPoint struct {
 	Value float64
+	Time  time.Time
 }
 
 type TimeSeries struct {
@@ -19,7 +20,7 @@ type TimeSeries struct {
 }
 
 // GenerateTimeSeries generates a random time series with the given number of points and initial value.
-func GenerateTimeSeries(numOfPoints int, initialValue, volatility, trend float64) TimeSeries {
+func GenerateTimeSeries(numOfPoints int, initialValue, volatility, trend float64, timeInterval time.Duration) TimeSeries {
 
 	// Assign default values if not provided
 	if volatility == 0.0 {
@@ -35,6 +36,7 @@ func GenerateTimeSeries(numOfPoints int, initialValue, volatility, trend float64
 
 	points := make([]DataPoint, numOfPoints)
 	currentValue := initialValue
+	startTime := time.Now()
 
 	for i := 0; i < numOfPoints; i++ {
 
@@ -45,8 +47,11 @@ func GenerateTimeSeries(numOfPoints int, initialValue, volatility, trend float64
 		trendFactor := trend * float64(i)
 		currentValue += change + trendFactor
 
+		timestamp := startTime.Add(timeInterval * time.Duration(i))
+
 		points[i] = DataPoint{
 			Value: math.Round(currentValue*100) / 100, // Round to 2 decimal places
+			Time:  timestamp,
 		}
 	}
 

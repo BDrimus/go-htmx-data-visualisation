@@ -1,0 +1,55 @@
+{{define "stock_component"}}
+<div>
+  
+  {{template "stock_info_panel" .}}
+
+  <div class="mt-4">
+    <div class="flex justify-center">
+      <a
+        hx-get="/stock_chart"
+        hx-vals='{"symbol": "{{.Symbol}}", "interval": "1d"}'
+        hx-target="#chart-container"
+        hx-swap="innerHTML"
+        class="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+        style="cursor: pointer;"
+      >
+        <span>View Stock Chart</span>
+        <svg width="12" height="12" viewBox="0 0 26 26" class="fill-current">
+          <g>
+            <polygon
+              points="0.046,2.582 2.13,0.498 12.967,11.334 23.803,0.498 25.887,2.582 12.967,15.502"
+            />
+            <polygon
+              points="0.046,13.582 2.13,11.498 12.967,22.334 23.803,11.498 25.887,13.582 12.967,26.502"
+            />
+          </g>
+        </svg>
+      </a>
+    </div>
+  </div>
+  <div class="mt-4">
+    <canvas id="chart-container"></canvas>
+  </div>
+</div>
+{{end}}
+
+{{define "stock_info_panel"}}
+<div class="grid grid-cols-3 gap-4 mt-4 text-center">
+  <div class="p-4 bg-gray-100 rounded">
+    <h3 class="font-semibold">Start Value</h3>
+    <p class="text-xl">£{{printf "%.2f" .Series.StartValue}}</p>
+  </div>
+  <div class="p-4 bg-gray-100 rounded">
+    <h3 class="font-semibold">End Value</h3>
+    <p class="text-xl">£{{printf "%.2f" .Series.EndValue}}</p>
+  </div>
+  <div class="p-4 bg-gray-100 rounded">
+    <h3 class="font-semibold">Delta</h3>
+    <p
+      class="text-xl {{if gt .Series.Delta 0.0}}text-green-600{{else if lt .Series.Delta 0.0}}text-red-600{{else}}text-gray-600{{end}}"
+    >
+      £{{printf "%.2f" .Series.Delta}}
+    </p>
+  </div>
+</div>
+{{end}}
