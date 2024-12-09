@@ -10,25 +10,20 @@ import (
 	"github.com/BDrimus/go-htmx-data-visualisation/internal/models/timeseries"
 )
 
-type StockPair struct {
-	Primary *StockData
-	Compare *StockData
-}
-
-var stockCache = &StockPair{
-	Primary: nil,
-	Compare: nil,
-}
-
 type StockData struct {
 	Symbol string
 	Series *timeseries.TimeSeries
 }
 
+type StockTemplateData struct {
+	StockData *StockData
+	Type      string
+}
+
 // Handler for the primary stock data
 func HandlePrimaryStock(w http.ResponseWriter, r *http.Request) {
 
-	stockData, err := getStockData(r, false)
+	stockData, err := getStockData(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -36,7 +31,12 @@ func HandlePrimaryStock(w http.ResponseWriter, r *http.Request) {
 
 	tmpl := initStockTemplate()
 
-	if err := tmpl.ExecuteTemplate(w, "stock_component", stockData); err != nil {
+	data := StockTemplateData{
+		StockData: stockData,
+		Type:      "primary",
+	}
+
+	if err := tmpl.ExecuteTemplate(w, "stock_component", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -45,7 +45,7 @@ func HandlePrimaryStock(w http.ResponseWriter, r *http.Request) {
 // Handler for the comparison stock data
 func HandleCompareStock(w http.ResponseWriter, r *http.Request) {
 
-	stockData, err := getStockData(r, true)
+	stockData, err := getStockData(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -53,14 +53,19 @@ func HandleCompareStock(w http.ResponseWriter, r *http.Request) {
 
 	tmpl := initStockTemplate()
 
-	if err := tmpl.ExecuteTemplate(w, "stock_info_panel", stockData); err != nil {
+	data := StockTemplateData{
+		StockData: stockData,
+		Type:      "compare",
+	}
+
+	if err := tmpl.ExecuteTemplate(w, "stock_info_panel", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 }
 
-func getStockData(r *http.Request, isCompare bool) (*StockData, error) {
+func getStockData(r *http.Request) (*StockData, error) {
 	symbol := r.URL.Query().Get("symbol")
 	if symbol == "" {
 		return nil, fmt.Errorf("stock symbol is required")
@@ -80,12 +85,6 @@ func getStockData(r *http.Request, isCompare bool) (*StockData, error) {
 	stockData := &StockData{
 		Symbol: symbol,
 		Series: &series,
-	}
-
-	if isCompare {
-		stockCache.Compare = stockData
-	} else {
-		stockCache.Primary = stockData
 	}
 
 	return stockData, nil

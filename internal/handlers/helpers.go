@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+	"html/template"
 	"strconv"
 	"strings"
-	"text/template"
 	"time"
 )
 
@@ -15,6 +15,17 @@ var funcMap = template.FuncMap{
 	"sub":     func(a, b float64) float64 { return a - b },
 	"div":     func(a, b float64) float64 { return a / b },
 	"float64": func(x int) float64 { return float64(x) },
+	"toJSON": func(v interface{}) template.HTMLAttr {
+		jsonBytes, err := json.Marshal(v)
+		if err != nil {
+			return template.HTMLAttr("{}")
+		}
+		// Escape the JSON string properly
+		jsonStr := string(jsonBytes)
+		// Replace any double quotes in the JSON with &quot; to prevent HTML attribute issues
+		jsonStr = strings.ReplaceAll(jsonStr, `"`, "&quot;")
+		return template.HTMLAttr(jsonStr)
+	},
 }
 
 func parseTimeInterval(interval string) (time.Duration, error) {

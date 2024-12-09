@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"encoding/json"
 	"html/template"
+	"log"
 	"net/http"
 	"path/filepath"
 
@@ -10,28 +12,47 @@ import (
 
 func StockChartHandler(w http.ResponseWriter, r *http.Request) {
 
-	// Get primary stock data
-	stockData := stockCache.Primary
+	// Extract primary stock data from request
+	primaryStockDataJSON := r.URL.Query().Get("primaryStockData")
 
-	var compareStockData *StockData
+	primaryStockData := StockData{}
 
-	// Get comparison stock if specified
-	if stockCache.Compare != nil {
-		compareStockData = stockCache.Compare
+	err := json.Unmarshal([]byte(primaryStockDataJSON), &primaryStockData)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	} else {
+		log.Println("No primary stock data")
+	}
+
+	// Extract secondary stock data from request
+	compareStockDataJSON := r.URL.Query().Get("compareStockData")
+
+	compareStockData := StockData{}
+
+	// Check if single stock or compare as well
+	if compareStockDataJSON != "" {
+		err = json.Unmarshal([]byte(compareStockDataJSON), &compareStockData)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		log.Println("No compare stock data")
 	}
 
 	data := struct {
 		PrimaryStock template.JS
 		CompareStock template.JS
 	}{
-		PrimaryStock: template.JS(mustMarshal(stockData)),
+		PrimaryStock: template.JS(mustMarshal(primaryStockData)),
 	}
-	if compareStockData != nil {
+	if compareStockData != (StockData{}) {
 		data.CompareStock = template.JS(mustMarshal(compareStockData))
 	}
 
 	tmpl := template.New(config.BaseTemplate).Funcs(funcMap)
-	tmpl, err := tmpl.ParseFiles(
+	tmpl, err = tmpl.ParseFiles(
 		filepath.Join(config.TemplatesFolder, config.BaseTemplate),
 		filepath.Join(config.TemplatesFolder, "stock_chart.html"),
 	)

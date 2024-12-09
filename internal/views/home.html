@@ -1,57 +1,60 @@
 {{define "title"}}Stock Viewer{{end}} {{define "content"}}
 <div class="bg-white shadow-lg rounded-lg p-6">
-  <div class="flex justify-between">
-  <div class="form-group">
-    <label for="stockSelect">Select Stock Symbol:</label>
-    <select
-      id="stockSelect"
-      name="symbol"
-      class="form-control"
-      hx-get="/stock/primary"
-      hx-trigger="change"
-      hx-target="#stock-result"
-      hx-indicator="#loading"
-      style="cursor: pointer"
-    >
-      <option value="">Choose a stock...</option>
-      <option value="AAPL">Apple (AAPL)</option>
-      <option value="GOOGL">Google (GOOGL)</option>
-      <option value="MSFT">Microsoft (MSFT)</option>
-      <option value="AMZN">Amazon (AMZN)</option>
-      <option value="META">Meta (META)</option>
-    </select>
-  </div>
+    <div class="flex justify-between">
+        <div class="form-group">
+            <label for="stockSelect">Select Stock Symbol:</label>
+            <select
+                id="stockSelect"
+                name="symbol"
+                class="form-control"
+                hx-get="/stock/primary"
+                hx-trigger="change"
+                hx-target="#stock-result"
+                hx-indicator="#loading"
+                style="cursor: pointer"
+            >
+                <option value="">Choose a stock...</option>
+                <option value="AAPL">Apple (AAPL)</option>
+                <option value="GOOGL">Google (GOOGL)</option>
+                <option value="MSFT">Microsoft (MSFT)</option>
+                <option value="AMZN">Amazon (AMZN)</option>
+                <option value="META">Meta (META)</option>
+            </select>
+        </div>
 
-  <div>
-    <label for="compareSelect">Compare with:</label>
-    <select
-      id="compareSelect"
-      name="symbol"
-      class="form-control"
-      hx-get="/stock/compare"
-      hx-trigger="change"
-      hx-target="#stock-result-compare"
-      hx-indicator="#loading"
-      style="cursor: pointer"
-    >
-      <option value="">Select comparison stock...</option>
-      <option value="AAPL">Apple (AAPL)</option>
-      <option value="GOOGL">Google (GOOGL)</option>
-      <option value="MSFT">Microsoft (MSFT)</option>
-      <option value="AMZN">Amazon (AMZN)</option>
-      <option value="META">Meta (META)</option>
-    </select>
-  </div>
-  </div>
-
-  <div id="loading" class="htmx-indicator">
-    <div class="spinner-border text-primary" role="status">
-      <span class="sr-only">Loading...</span>
+        <div>
+            <label for="compareSelect">Compare with:</label>
+            <select
+                id="compareSelect"
+                name="symbol"
+                class="form-control"
+                hx-get="/stock/compare"
+                hx-trigger="change"
+                hx-target="#stock-result-compare"
+                hx-indicator="#loading"
+                style="cursor: pointer"
+            >
+                <option value="">Select comparison stock...</option>
+                <option value="AAPL">Apple (AAPL)</option>
+                <option value="GOOGL">Google (GOOGL)</option>
+                <option value="MSFT">Microsoft (MSFT)</option>
+                <option value="AMZN">Amazon (AMZN)</option>
+                <option value="META">Meta (META)</option>
+            </select>
+        </div>
     </div>
-  </div>
 
-  <div id="stock-result"></div>
-  <div id="stock-result-compare"></div>
+    <div id="loading" class="htmx-indicator">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+    <div id="stock-result"></div>
+    <div class="mt-4">
+        <canvas id="chart-container"></canvas>
+    </div>
+    <div id="stock-result-compare"</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
