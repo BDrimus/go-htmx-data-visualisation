@@ -2,7 +2,7 @@
 
 <div class="mt-4">
     <div class="flex justify-center">
-        <a
+        <div
             id="chart-builder"
             hx-get="/stock_chart"
             hx-vals='js:{"symbol": "{{.StockData.Symbol}}", "interval": "1d", "primaryStockData": getStockData("primary"), "compareStockData": getStockData("compare")}'
@@ -11,23 +11,11 @@
             class="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
             style="cursor: pointer"
         >
-            <span>View Stock Chart</span>
-            <svg
-                width="12"
-                height="12"
-                viewBox="0 0 26 26"
-                class="fill-current"
+            <span
+                class="text-sm rounded-lg block w-full p-2.5 border-gray-600 text-sm bg-gray-600 text-white"
+                >Show/Update Stock Chart</span
             >
-                <g>
-                    <polygon
-                        points="0.046,2.582 2.13,0.498 12.967,11.334 23.803,0.498 25.887,2.582 12.967,15.502"
-                    />
-                    <polygon
-                        points="0.046,13.582 2.13,11.498 12.967,22.334 23.803,11.498 25.887,13.582 12.967,26.502"
-                    />
-                </g>
-            </svg>
-        </a>
+        </div>
     </div>
 </div>
 
@@ -39,21 +27,49 @@
     class="grid grid-cols-3 gap-4 mt-4 text-center"
     data-stock="{{toJSON .StockData}}"
 >
-    <div class="p-4 bg-gray-100 rounded">
+    <div class="p-4 text-sm bg-gray-600 text-white rounded-lg">
         <h3 class="font-semibold">Start Value</h3>
         <p class="text-xl">£{{printf "%.2f" .StockData.Series.StartValue}}</p>
     </div>
-    <div class="p-4 bg-gray-100 rounded">
+    <div class="p-4 text-sm bg-gray-600 text-white rounded-lg">
         <h3 class="font-semibold">End Value</h3>
         <p class="text-xl">£{{printf "%.2f" .StockData.Series.EndValue}}</p>
     </div>
-    <div class="p-4 bg-gray-100 rounded">
+    <div class="p-4 text-sm bg-gray-600 text-white rounded-lg">
         <h3 class="font-semibold">Delta</h3>
         <p
-            class="text-xl {{if gt .StockData.Series.Delta 0.0}}text-green-600{{else if lt .StockData.Series.Delta 0.0}}text-red-600{{else}}text-gray-600{{end}}"
+            class="text-xl {{if gt .StockData.Series.Delta 0.0}}text-lime-500{{else if lt .StockData.Series.Delta 0.0}}text-red-500{{else}}text-gray-600{{end}}"
         >
             £{{printf "%.2f" .StockData.Series.Delta}}
         </p>
+    </div>
+</div>
+
+{{template "price_performance" .}} {{end}} {{define "price_performance"}}
+
+<div class="my-4">
+    <div class="flex justify-between">
+        <p>Min</p>
+        <p>Start</p>
+        <p>Max</p>
+    </div>
+    <div class="grid justify-stretch bg-gray-100 rounded-lg p-4 relative">
+        <div
+            class="p-4 rounded-lg {{if gt .StockData.Series.PricePercentageChangeFromStart 0.0}}bg-lime-600{{else if lt .StockData.Series.PricePercentageChangeFromStart 0.0}}bg-red-600{{else}}bg-gray-100{{end}} absolute"
+            style="{{if gt .StockData.Series.PricePercentageChangeFromStart 0.0}}
+            left: 50%;
+            width: {{div .StockData.Series.PricePercentageChangeFromStart 2}}%;
+        {{else}}
+            right: 50%;
+            width: {{div (abs .StockData.Series.PricePercentageChangeFromStart) 2}}%;
+        {{end}}"
+        ></div>
+        <div class="absolute inset-y-0 left-1/2 w-px bg-black p-0.5"></div>
+    </div>
+    <div class="flex justify-between">
+        <p>{{printf "%.2f" .StockData.Series.MinValue}}</p>
+        <p>{{printf "%.2f" .StockData.Series.StartValue}}</p>
+        <p>{{printf "%.2f" .StockData.Series.MaxValue}}</p>
     </div>
 </div>
 

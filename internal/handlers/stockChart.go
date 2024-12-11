@@ -21,8 +21,6 @@ func StockChartHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	} else {
-		log.Println("No primary stock data")
 	}
 
 	// Extract secondary stock data from request

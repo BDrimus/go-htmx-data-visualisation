@@ -12,25 +12,19 @@ type DataPoint struct {
 }
 
 type TimeSeries struct {
-	Points     []DataPoint
-	StartValue float64
-	EndValue   float64
-	Delta      float64
-	MaxValue   float64
+	Points                         []DataPoint
+	StartValue                     float64
+	EndValue                       float64
+	Delta                          float64
+	MaxValue                       float64
+	MinValue                       float64
+	PricePercentageChangeFromStart float64
 }
 
 // GenerateTimeSeries generates a random time series with the given number of points and initial value.
 func GenerateTimeSeries(numOfPoints int, initialValue, volatility, trend float64, timeInterval time.Duration) TimeSeries {
 
-	// Assign default values if not provided
-	if volatility == 0.0 {
-		volatility = 0.1 // 10% max change
-	}
-
-	if trend == 0.0 {
-		trend = 0.02 // 2% trend
-	}
-
+	// Assign default value if not provided
 	if timeInterval == 0 {
 		timeInterval = time.Minute
 	}
@@ -66,6 +60,8 @@ func GenerateTimeSeries(numOfPoints int, initialValue, volatility, trend float64
 	series.EndValue = points[len(points)-1].Value
 	series.Delta = series.EndValue - series.StartValue
 	series.MaxValue = series.max()
+	series.MinValue = series.min()
+	series.PricePercentageChangeFromStart = series.pricePercentageChangeFromStart()
 
 	return series
 }
@@ -79,4 +75,26 @@ func (ts TimeSeries) max() float64 {
 		}
 	}
 	return ts.MaxValue
+}
+
+func (ts TimeSeries) min() float64 {
+
+	var smallestValue float64 = ts.Points[0].Value
+
+	for _, point := range ts.Points {
+		if point.Value < smallestValue {
+			smallestValue = point.Value
+		}
+	}
+
+	return smallestValue
+}
+
+// pricePercentageChangeFromStart returns the percentage change from the start value to the end value
+func (ts TimeSeries) pricePercentageChangeFromStart() float64 {
+	if ts.EndValue > ts.StartValue {
+		return (ts.EndValue - ts.StartValue) / (ts.MaxValue - ts.StartValue) * 100
+	} else {
+		return (ts.StartValue - ts.EndValue) / (ts.StartValue - ts.MinValue) * -100
+	}
 }

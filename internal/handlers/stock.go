@@ -73,7 +73,7 @@ func getStockData(r *http.Request) (*StockData, error) {
 
 	timeInterval := r.URL.Query().Get("interval")
 	if timeInterval == "" {
-		timeInterval = "1m"
+		timeInterval = config.DefaultTimeInterval
 	}
 
 	timeIntervalDuration, err := parseTimeInterval(timeInterval)
@@ -81,7 +81,7 @@ func getStockData(r *http.Request) (*StockData, error) {
 		return nil, fmt.Errorf("invalid time interval")
 	}
 
-	series := timeseries.GenerateTimeSeries(50, 100.0, 0, 0, timeIntervalDuration)
+	series := timeseries.GenerateTimeSeries(config.MaxDataPoints, config.InitialValue, config.Volatility, config.Trend, timeIntervalDuration)
 	stockData := &StockData{
 		Symbol: symbol,
 		Series: &series,

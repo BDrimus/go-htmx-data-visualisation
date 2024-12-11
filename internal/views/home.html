@@ -6,7 +6,7 @@
             <select
                 id="stockSelect"
                 name="symbol"
-                class="form-control"
+                class="form-control text-sm rounded-lg block w-full p-2.5 bg-gray-600 border-gray-600 text-white"
                 hx-get="/stock/primary"
                 hx-trigger="change"
                 hx-target="#stock-result"
@@ -27,7 +27,7 @@
             <select
                 id="compareSelect"
                 name="symbol"
-                class="form-control"
+                class="form-control text-sm rounded-lg block w-full p-2.5 border-gray-600 text-sm bg-gray-600 text-white"
                 hx-get="/stock/compare"
                 hx-trigger="change"
                 hx-target="#stock-result-compare"
@@ -50,12 +50,13 @@
         </div>
     </div>
 
-    <div id="stock-result"></div>
-    <div class="mt-4">
+    <div id="stock-result" class="my-4"></div>
+    <div class="my-4">
         <canvas id="chart-container"></canvas>
     </div>
-    <div id="stock-result-compare"</div>
+    <div id="stock-result-compare" class="my-4"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/js/stockSelectReset.js"></script>
 {{end}}
